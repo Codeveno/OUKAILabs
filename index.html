@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JuaSahii Chat</title>
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e5ddd5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    width: 400px;
+    height: 600px;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.chat-header {
+    background: #075e54;
+    color: white;
+    padding: 15px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #e5ddd5;
+}
+
+.message {
+    max-width: 70%;
+    padding: 10px 15px;
+    border-radius: 20px;
+    position: relative;
+    word-wrap: break-word;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.message.user {
+    align-self: flex-end;
+    background: #dcf8c6;
+    border-bottom-right-radius: 0;
+}
+
+.message.bot {
+    align-self: flex-start;
+    background: white;
+    border-bottom-left-radius: 0;
+}
+
+.input-area {
+    display: flex;
+    padding: 10px;
+    gap: 10px;
+    background: #f0f0f0;
+}
+
+input[type=text] {
+    flex: 1;
+    padding: 10px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
+button {
+    background: #075e54;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #054d44;
+}
+</style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">Knowsahii Chat</div>
+    <div id="chat" class="chat-box"></div>
+    <div class="input-area">
+        <input id="userInput" type="text" placeholder="Type a message..." />
+        <button onclick="sendMessage()">&#9658;</button>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const message = input.value.trim();
+    if(!message) return;
+
+    const chat = document.getElementById("chat");
+
+    // User message
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+    userMsg.textContent = message;
+    chat.appendChild(userMsg);
+
+    input.value = "";
+    chat.scrollTop = chat.scrollHeight;
+
+    // Bot reply
+    const res = await fetch("/chat", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message})
+    });
+
+    const data = await res.json();
+    const botMsg = document.createElement("div");
+    botMsg.className = "message bot";
+    botMsg.textContent = data.reply;
+    chat.appendChild(botMsg);
+
+    chat.scrollTop = chat.scrollHeight;
+}
+
+document.getElementById("userInput").addEventListener("keypress", function(e) {
+    if(e.key === "Enter") sendMessage();
+});
+</script>
+</body>
+</html>
